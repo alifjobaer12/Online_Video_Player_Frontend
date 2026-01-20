@@ -8,7 +8,7 @@ export default function App() {
 
   /* FETCH EPISODES */
   useEffect(() => {
-    fetch("http://localhost:5000/api/episodes")
+    fetch("/api/episodes")
       .then((res) => res.json())
       .then((data) => {
         const eps = data.episodes || [];
