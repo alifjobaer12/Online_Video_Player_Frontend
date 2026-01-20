@@ -8,7 +8,7 @@ export default function App() {
 
   /* FETCH EPISODES */
   useEffect(() => {
-    fetch("http://online-video-player-frontend-171j.vercel.app/api/episodes")
+    fetch(`${import.meta.env.VITE_API_URL}/api/episodes`)
       .then((res) => res.json())
       .then((data) => {
         const eps = data.episodes || [];
