@@ -9,7 +9,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "https://online-video-player-frontend-171j.vercel.app",
+        target: "",
         changeOrigin: true,
         secure: false
       }
