@@ -53,7 +53,7 @@ export default function PlayerArea({ series }) {
   };
 
   return (
-    <div className="text-white px-2 sm:px-4">
+    <div className="text-white px-2 pt-4 sm:px-4">
       {/* TITLE */}
       <h1 className="text-base sm:text-lg md:text-xl font-bold mb-3 text-left sm:text-left">
         {current

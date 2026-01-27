@@ -15,7 +15,7 @@ export default function Sidebar({ onSelect }) {
   }, [search]);
 
   return (
-    <div className="p-3 sm:p-4 h-full">
+    <div className="p-3 pt-7 sm:p-4 h-full">
       {/* SEARCH */}
       <input
         className="w-57 sm:w-full p-2 sm:p-3 rounded bg-[#0b1437] text-sm sm:text-base"

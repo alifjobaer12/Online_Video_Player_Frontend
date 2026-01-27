@@ -14,7 +14,7 @@ export default function Home() {
         onClick={() => setSidebarOpen((prev) => !prev)}
         className="
           sm:hidden
-          fixed top-3 right-3 z-50
+          fixed top-7 right-3 z-50
           bg-[#050b1e] px-2 py-1 rounded
         "
       >
