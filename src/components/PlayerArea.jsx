@@ -14,7 +14,7 @@ export default function PlayerArea({ series }) {
 
   if (!series) {
     return (
-      <div className="text-gray-400 flex items-center justify-center h-full">
+      <div className="text-gray-400 flex items-center justify-center h-full text-sm sm:text-base">
         Select a series
       </div>
     );
@@ -36,27 +36,26 @@ export default function PlayerArea({ series }) {
   };
 
   const getShortEpisodeTitle = (title) => {
-  if (!title) return "";
+    if (!title) return "";
 
-  // Match S01E02 / s01e02
-  let match = title.match(/S\d{2}E\d{2}/i);
-  if (match) {
-    return match[0].toUpperCase().replace("S", "Season ").replace("E", " Episode ");
-  }
+    let match = title.match(/S\d{2}E\d{2}/i);
+    if (match) {
+      return match[0]
+        .toUpperCase()
+        .replace("S", "S ")
+        .replace("E", " Ep ");
+    }
 
-  // Match Episode 02
-  match = title.match(/Episode\s*\d+/i);
-  if (match) return match[0];
+    match = title.match(/Ep\s*\d+/i);
+    if (match) return match[0];
 
-  // Fallback: remove extension
-  return title.replace(/\.[^/.]+$/, "");
-};
-
+    return title.replace(/\.[^/.]+$/, "");
+  };
 
   return (
-    <div className="text-white">
+    <div className="text-white px-2 sm:px-4">
       {/* TITLE */}
-      <h1 className="text-xl font-bold mb-3">
+      <h1 className="text-base sm:text-lg md:text-xl font-bold mb-3 text-left sm:text-left">
         {current
           ? `${series.series} — ${getShortEpisodeTitle(current.name)}`
           : series.series}
@@ -67,16 +66,16 @@ export default function PlayerArea({ series }) {
         <iframe
           key={`${current?.name}-${server}`}
           src={streamUrl()}
-          className="w-full max-w-4xl aspect-video rounded bg-black"
+          className="w-full max-w-full sm:max-w-3xl md:max-w-4xl aspect-video rounded bg-black"
           allowFullScreen
         />
       </div>
 
       {/* SERVER SWITCH */}
-      <div className="flex gap-3 mb-4 justify-center">
+      <div className="flex flex-wrap gap-2 mb-4 justify-center">
         <button
           onClick={() => setServer("streamwish")}
-          className={`px-4 py-2 rounded ${
+          className={`px-3 py-2 text-sm sm:text-base rounded ${
             server === "streamwish"
               ? "bg-blue-600"
               : "bg-[#0b1437] hover:bg-blue-500"
@@ -87,7 +86,7 @@ export default function PlayerArea({ series }) {
 
         <button
           onClick={() => setServer("streamtape")}
-          className={`px-4 py-2 rounded ${
+          className={`px-3 py-2 text-sm sm:text-base rounded ${
             server === "streamtape"
               ? "bg-indigo-600"
               : "bg-[#0b1437] hover:bg-indigo-500"
@@ -98,16 +97,24 @@ export default function PlayerArea({ series }) {
       </div>
 
       {/* EPISODES */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 max-w-4xl mx-auto">
+      <div
+        className="
+        grid grid-cols-2 
+        sm:grid-cols-3 
+        md:grid-cols-4 
+        lg:grid-cols-6 
+        gap-2 max-w-4xl mx-auto
+      "
+      >
         {episodes.map((ep, i) => (
           <button
             key={i}
             onClick={() => setCurrent(ep)}
-            className={`p-2 rounded text-sm transition ${
+            className={`p-2 rounded text-xs sm:text-sm transition ${
               current === ep ? "bg-blue-600" : "bg-[#0b1437] hover:bg-blue-500"
             }`}
           >
-            Episode {i + 1}
+            Ep {i + 1}
           </button>
         ))}
       </div>
