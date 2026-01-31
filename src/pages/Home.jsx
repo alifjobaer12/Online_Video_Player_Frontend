@@ -8,8 +8,7 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen bg-[#050b1e] text-white overflow-hidden">
-
-      {/* 🔹 MOBILE TOGGLE BUTTON (☰ ↔ ✕) */}
+      {/* 🔹 MOBILE TOGGLE BUTTON */}
       <button
         onClick={() => setSidebarOpen((prev) => !prev)}
         className="
@@ -21,34 +20,28 @@ export default function Home() {
         {sidebarOpen ? "✕" : "☰"}
       </button>
 
-      {/* 🔹 DESKTOP LAYOUT */}
-      <div className="hidden sm:flex min-h-screen">
-        <div className="flex-1 p-6 overflow-y-auto">
+      {/* 🔹 MAIN LAYOUT (ONE PLAYER AREA) */}
+      <div className="min-h-screen sm:flex">
+        {/* PLAYER AREA */}
+        <div
+          className={`
+            flex-1 p-4 sm:p-6 overflow-y-auto transition
+            ${sidebarOpen ? "pointer-events-none sm:pointer-events-auto" : ""}
+          `}
+        >
           <PlayerArea
             key={selectedSeries?.id || selectedSeries?.series}
             series={selectedSeries}
           />
         </div>
 
-        <div className="w-87.5 bg-[#060d25] border-l border-gray-800">
+        {/* DESKTOP SIDEBAR */}
+        <div className="hidden sm:block w-87.5 bg-[#060d25] border-l border-gray-800">
           <Sidebar onSelect={setSelectedSeries} />
         </div>
       </div>
 
-      {/* 🔹 MOBILE PLAYER (BLOCK INTERACTION WHEN SIDEBAR OPEN) */}
-      <div
-        className={`
-          sm:hidden p-4 transition
-          ${sidebarOpen ? "pointer-events-none" : "pointer-events-auto"}
-        `}
-      >
-        <PlayerArea
-          key={selectedSeries?.id || selectedSeries?.series}
-          series={selectedSeries}
-        />
-      </div>
-
-      {/* 🔹 MOBILE SIDEBAR OVERLAY + PANEL */}
+      {/* 🔹 MOBILE SIDEBAR OVERLAY */}
       <div
         className={`
           fixed inset-0 z-40 sm:hidden
@@ -62,7 +55,7 @@ export default function Home() {
           onClick={() => setSidebarOpen(false)}
         />
 
-        {/* SIDEBAR (FIXED + CONTROLLED) */}
+        {/* SIDEBAR PANEL */}
         <div
           className={`
             fixed top-0 right-0 h-screen w-72
@@ -75,7 +68,7 @@ export default function Home() {
           <Sidebar
             onSelect={(series) => {
               setSelectedSeries(series);
-              setSidebarOpen(false); // auto close on select
+              setSidebarOpen(false);
             }}
           />
         </div>
