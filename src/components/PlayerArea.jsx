@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 export default function PlayerArea({ series }) {
   const [server, setServer] = useState("streamwish");
@@ -9,8 +9,14 @@ export default function PlayerArea({ series }) {
     return Object.values(series.info);
   }, [series]);
 
-  /* FIRST EPISODE AUTO-SELECTED */
-  const [current, setCurrent] = useState(() => episodes[0] || null);
+  /* FIXED: AUTO SELECT FIRST EP AFTER LOAD */
+  const [current, setCurrent] = useState(null);
+
+  useEffect(() => {
+    if (episodes.length > 0) {
+      setCurrent(episodes[0]);
+    }
+  }, [episodes]);
 
   if (!series) {
     return (
@@ -35,19 +41,19 @@ export default function PlayerArea({ series }) {
     return "";
   };
 
+  /* FORMAT EPISODE TITLE */
   const getShortEpisodeTitle = (title) => {
     if (!title) return "";
 
-    let match = title.match(/S\d{2}E\d{2}/i);
+    // S01E01 → Ep 1
+    const match = title.match(/S\d+E(\d+)/i);
     if (match) {
-      return match[0]
-        .toUpperCase()
-        .replace("S", "S ")
-        .replace("E", " Ep ");
+      return `Ep ${parseInt(match[1], 10)}`;
     }
 
-    match = title.match(/Ep\s*\d+/i);
-    if (match) return match[0];
+    // fallback
+    const epMatch = title.match(/Ep\s*\d+/i);
+    if (epMatch) return epMatch[0];
 
     return title.replace(/\.[^/.]+$/, "");
   };
@@ -55,7 +61,7 @@ export default function PlayerArea({ series }) {
   return (
     <div className="text-white px-2 pt-4 sm:px-4">
       {/* TITLE */}
-      <h1 className="text-base sm:text-lg md:text-xl font-bold mb-3 text-left sm:text-left">
+      <h1 className="text-base sm:text-lg md:text-xl font-bold mb-3 text-left">
         {current
           ? `${series.series} — ${getShortEpisodeTitle(current.name)}`
           : series.series}
@@ -111,10 +117,12 @@ export default function PlayerArea({ series }) {
             key={i}
             onClick={() => setCurrent(ep)}
             className={`p-2 rounded text-xs sm:text-sm transition ${
-              current === ep ? "bg-blue-600" : "bg-[#0b1437] hover:bg-blue-500"
+              current === ep
+                ? "bg-blue-600"
+                : "bg-[#0b1437] hover:bg-blue-500"
             }`}
           >
-            Ep {i + 1}
+            {getShortEpisodeTitle(ep.name)}
           </button>
         ))}
       </div>
