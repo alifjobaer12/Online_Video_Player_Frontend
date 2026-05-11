@@ -23,3 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 *.env
+
+# Caveman / AI Agents
+.agents/
+skills-lock.json
+AGENTS.md
+.cursor/
+.windsurf/
