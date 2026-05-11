@@ -118,14 +118,14 @@ export default function Sidebar({ onSelect }) {
 				))}
 			</div>
 
-			<div className="flex items-center justify-between gap-2 text-xs sm:text-sm pb-1">
+			<div className="flex items-center justify-between gap-2 text-xs sm:text-sm mb-30 sm:mb-0 px-2 py-1">
 				<button
 					type="button"
 					disabled={loading || page <= 1}
 					onClick={() =>
 						setPage((current) => Math.max(current - 1, 1))
 					}
-					className="rounded bg-[#0b1437] px-3 py-2 text-base leading-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer "
+					className="rounded bg-[#0b1437] px-3 py-2 text-base leading-none transition cursor-pointer active:bg-blue-700 active:scale-75 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:active:bg-[#0b1437]"
 				>
 					<ChevronLeft />
 				</button>
@@ -140,7 +140,7 @@ export default function Sidebar({ onSelect }) {
 					onClick={() =>
 						setPage((current) => Math.min(current + 1, totalPages))
 					}
-					className="rounded bg-[#0b1437] px-3 py-2 text-base leading-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+					className="rounded bg-[#0b1437] px-3 py-2 text-base leading-none transition cursor-pointer active:bg-blue-700 active:scale-75 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:active:bg-[#0b1437]"
 				>
 					<ChevronRight />
 				</button>
