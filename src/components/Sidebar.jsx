@@ -99,7 +99,35 @@ export default function Sidebar({ onSelect }) {
 				{series.map((s) => (
 					<div
 						key={s._id || s.id || s.series}
-						onClick={() => onSelect(s)}
+						onClick={() => {
+							// persist selection and reflect per-series last-ep in URL (1-based)
+							try {
+								localStorage.setItem(
+									"vp_selectedSeries",
+									JSON.stringify(s),
+								);
+								const key = s._id || s.series;
+								const stored = localStorage.getItem(
+									`vp_currentEpIndex_${key}`,
+								);
+								const epForUrl =
+									stored != null
+										? String(parseInt(stored, 10) + 1)
+										: "1";
+								const url = new URL(window.location.href);
+								url.searchParams.set("series", key);
+								url.searchParams.set("ep", epForUrl);
+								window.history.replaceState(
+									{},
+									"",
+									url.toString(),
+								);
+							} catch (e) {
+								// ignore storage errors
+							}
+
+							onSelect(s);
+						}}
 						className="
               bg-[#0b1437] 
               p-3 rounded 
