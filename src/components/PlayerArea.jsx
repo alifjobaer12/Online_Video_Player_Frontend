@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 export default function PlayerArea({ series, initialEpIndex = 0 }) {
 	const [server, setServer] = useState("streamwish");
@@ -11,10 +11,6 @@ export default function PlayerArea({ series, initialEpIndex = 0 }) {
 
 	/* FIXED: AUTO SELECT FIRST EP AFTER LOAD */
 	const [current, setCurrent] = useState(null);
-	const [savedTime, setSavedTime] = useState(0);
-	const [autoSaveAvailable, setAutoSaveAvailable] = useState(false);
-	const [lastAutoSaved, setLastAutoSaved] = useState(null);
-	const iframeRef = useRef(null);
 
 	useEffect(() => {
 		if (episodes.length > 0) {
@@ -56,14 +52,6 @@ export default function PlayerArea({ series, initialEpIndex = 0 }) {
 
 			const idx = Math.max(0, Math.min(chosenIndex, episodes.length - 1));
 			setCurrent(episodes[idx]);
-
-			try {
-				const key = `vp_time_${seriesKey}_${idx}`;
-				const t = parseFloat(localStorage.getItem(key));
-				if (!Number.isNaN(t) && t > 0) setSavedTime(t);
-			} catch (e) {
-				// ignore
-			}
 		}
 	}, [episodes, initialEpIndex, series]);
 
@@ -98,47 +86,6 @@ export default function PlayerArea({ series, initialEpIndex = 0 }) {
 		}
 	}, [current, episodes, series]);
 
-	// Periodic auto-save of playback position when iframe is same-origin and exposes a <video>
-	useEffect(() => {
-		let id = null;
-
-		const trySave = async () => {
-			if (!iframeRef.current || !series || !current) return;
-			const seriesKey = series._id || series.series || "";
-			const idx = episodes.findIndex((ep) => ep === current);
-			if (idx < 0) return;
-
-			try {
-				const win = iframeRef.current.contentWindow;
-				// Accessing location will throw if cross-origin
-				// eslint-disable-next-line no-unused-vars
-				const _ = win.location.href;
-				const doc = iframeRef.current.contentDocument || win.document;
-				if (!doc) throw new Error("no doc");
-				const video = doc.querySelector("video");
-				if (video && typeof video.currentTime === "number") {
-					const t = Math.floor(video.currentTime);
-					const key = `vp_time_${seriesKey}_${idx}`;
-					localStorage.setItem(key, String(t));
-					setSavedTime(t);
-					setAutoSaveAvailable(true);
-					setLastAutoSaved(Date.now());
-				}
-			} catch (e) {
-				// Cross-origin or other error — mark unavailable
-				setAutoSaveAvailable(false);
-			}
-		};
-
-		// try immediately, then every 15s
-		trySave();
-		id = setInterval(trySave, 15000);
-
-		return () => {
-			if (id) clearInterval(id);
-		};
-	}, [iframeRef, series, current, episodes]);
-
 	if (!series) {
 		return (
 			<div className="text-gray-400 flex items-center justify-center h-full text-sm sm:text-base">
@@ -152,10 +99,7 @@ export default function PlayerArea({ series, initialEpIndex = 0 }) {
 		if (!current) return "";
 
 		if (server === "streamwish" && current.streamwish_res) {
-			let url = `${import.meta.env.VITE_SERVER1_URL}/${current.streamwish_res}`;
-			if (savedTime && savedTime > 0)
-				url += `#t=${Math.floor(savedTime)}`;
-			return url;
+			return `${import.meta.env.VITE_SERVER1_URL}/${current.streamwish_res}`;
 		}
 
 		if (server === "streamtape" && current.streamtape_res) {
@@ -182,36 +126,6 @@ export default function PlayerArea({ series, initialEpIndex = 0 }) {
 		return title.replace(/\.[^/.]+$/, "");
 	};
 
-	const copyLink = async () => {
-		if (!series || !current) return;
-		const idx = episodes.findIndex((ep) => ep === current);
-		const key = series._id || series.series || "";
-		const url = `${window.location.origin}${window.location.pathname}?series=${encodeURIComponent(key)}&ep=${idx + 1}`;
-		try {
-			await navigator.clipboard.writeText(url);
-		} catch (e) {
-			// ignore
-		}
-	};
-
-	const handleSavePosition = () => {
-		if (!series || !current) return;
-		const idx = episodes.findIndex((ep) => ep === current);
-		const value = prompt(
-			"Enter playback time in seconds to save (e.g. 120 for 2m):",
-			String(Math.floor(savedTime || 0)),
-		);
-		if (value == null) return;
-		const t = parseFloat(value);
-		if (Number.isNaN(t) || t < 0) return;
-		try {
-			const seriesKey = series._id || series.series || "";
-			const key = `vp_time_${seriesKey}_${idx}`;
-			localStorage.setItem(key, String(t));
-			setSavedTime(t);
-		} catch (e) {}
-	};
-
 	return (
 		<div className="text-white px-2 pt-4 sm:px-4">
 			{/* TITLE */}
@@ -224,7 +138,6 @@ export default function PlayerArea({ series, initialEpIndex = 0 }) {
 			{/* PLAYER */}
 			<div className="mb-4 flex justify-center">
 				<iframe
-					ref={iframeRef}
 					key={`${current?.name}-${server}`}
 					src={streamUrl()}
 					className="w-full max-w-full sm:max-w-3xl md:max-w-4xl aspect-video rounded bg-black"
@@ -256,39 +169,6 @@ export default function PlayerArea({ series, initialEpIndex = 0 }) {
 					StreamTape
 				</button>
 			</div>
-
-			{/* LINK + SAVE POSITION */}
-			<div className="flex items-center justify-center gap-3 mb-4">
-				<button
-					onClick={copyLink}
-					className="px-3 py-1 text-sm rounded bg-[#0b1437] hover:bg-blue-600"
-				>
-					Copy link
-				</button>
-
-				<button
-					onClick={handleSavePosition}
-					className="px-3 py-1 text-sm rounded bg-[#0b1437] hover:bg-blue-600"
-				>
-					Save position
-				</button>
-			</div>
-
-			{autoSaveAvailable ? (
-				<div className="text-xs text-green-300 text-center mb-4">
-					Auto-save enabled
-					{lastAutoSaved && (
-						<span className="ml-2 text-gray-300">
-							(last saved{" "}
-							{new Date(lastAutoSaved).toLocaleTimeString()})
-						</span>
-					)}
-				</div>
-			) : (
-				<div className="text-xs text-yellow-300 text-center mb-4">
-					Auto-save unavailable (cross-origin iframe)
-				</div>
-			)}
 
 			{/* EPISODES */}
 			<div
